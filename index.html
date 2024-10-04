@@ -1,45 +1,28 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE HTML>
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ID Reader</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin-top: 50px;
-        }
-        .message {
-            font-size: 24px;
-            margin-bottom: 20px;
-        }
-    </style>
+    <title>Smart Attendance System</title>
 </head>
 <body>
-    <div class="message">Please tap your ID on the reader</div>
+    <h1>Please tap your ID on the reader</h1>
     <div id="status"></div>
-
     <script>
-        // Function to check status messages and handle redirection
-        function handleResponse(response) {
-            const statusDiv = document.getElementById('status');
-            if (response === "UID already registered") {
-                statusDiv.innerHTML = "<p style='color: red;'>Card is already registered!</p>";
-            } else if (response === "UID is stored in column E") {
-                statusDiv.innerHTML = "<p style='color: green;'>Card has been registered successfully. Redirecting...</p>";
-                setTimeout(() => {
-                    window.location.href = 'https://docs.google.com/forms/d/e/1FAIpQLSdkTcBJgHByX-f57m20xfLGWHnAVIuHVktHrRDOCqWEuwUYww/viewform'; // Replace with your Google Form URL
-                }, 3000); // Redirect after 3 seconds
-            } else {
-                statusDiv.innerHTML = "<p>An unexpected error occurred.</p>";
+        async function registerCard() {
+            const response = await fetch('http://192.168.254.122/register'); // Replace with your ESP8266 IP address
+            const data = await response.text();
+            document.getElementById('status').innerText = data;
+
+            if (data.includes("UID already registered")) {
+                // If UID is already registered, display message
+                alert("Card is already registered!");
+            } else if (data.includes("UID is stored in column E")) {
+                // If UID is successfully registered, redirect to Google Form
+                window.location.href = "https://docs.google.com/forms/d/e/1FAIpQLSdkTcBJgHByX-f57m20xfLGWHnAVIuHVktHrRDOCqWEuwUYww/viewform"; // Replace with your Google Form URL
             }
         }
 
-        // Listen for the message from the Arduino
-        window.addEventListener('message', (event) => {
-            handleResponse(event.data);
-        });
+        // Call the registerCard function periodically (e.g., every 5 seconds)
+        setInterval(registerCard, 5000);
     </script>
 </body>
 </html>
