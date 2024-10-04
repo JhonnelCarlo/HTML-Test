@@ -3,15 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RFID Registration</title>
+    <title>ID Reader</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
-        h1 { font-size: 24px; }
-        a { display: block; margin-top: 20px; }
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        .message {
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
-    <h1>Please tap your ID on the reader</h1>
-    <p>Tap your RFID card and complete the registration process.</p>
+    <div class="message">Please tap your ID on the reader</div>
+    <div id="status"></div>
+
+    <script>
+        // Function to check status messages and handle redirection
+        function handleResponse(response) {
+            const statusDiv = document.getElementById('status');
+            if (response === "UID already registered") {
+                statusDiv.innerHTML = "<p style='color: red;'>Card is already registered!</p>";
+            } else if (response === "UID is stored in column E") {
+                statusDiv.innerHTML = "<p style='color: green;'>Card has been registered successfully. Redirecting...</p>";
+                setTimeout(() => {
+                    window.location.href = 'https://docs.google.com/forms/d/e/1FAIpQLSdkTcBJgHByX-f57m20xfLGWHnAVIuHVktHrRDOCqWEuwUYww/viewform'; // Replace with your Google Form URL
+                }, 3000); // Redirect after 3 seconds
+            } else {
+                statusDiv.innerHTML = "<p>An unexpected error occurred.</p>";
+            }
+        }
+
+        // Listen for the message from the Arduino
+        window.addEventListener('message', (event) => {
+            handleResponse(event.data);
+        });
+    </script>
 </body>
 </html>
